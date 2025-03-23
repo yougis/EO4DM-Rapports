@@ -1,0 +1,377 @@
+---
+title: "Analyse de données Sècheresse"
+lang: fr
+subtitle: ""
+date: today
+date-format: "D MMMM YYYY"
+license: "CC BY"
+citation: True
+author: "Observatoire de l'Environnement en Nouvelle-Calédonie (OEIL)"
+toc: True
+keep-tex: true
+number-sections: true
+html-table-processing: none
+format:
+    html: 
+      default: true
+      page-layout: custom
+    pdf:
+      output-file: "@@date_@@title"
+      output-ext:  "pdf"
+      geometry:
+        - top=20mm
+        - left=20mm
+        - right=20mm
+      include-in-header: 
+        text: |
+          \usepackage{typearea}
+          \usepackage{scrlayer-scrpage}
+          \rofoot{Diffusion limitée - OEIL}
+      fontsize: 10pt
+      fig-pos: H
+      header-includes:
+        - \usepackage{float}
+        - \floatplacement{table}{H}  
+style: |
+  .table-annexe {
+    width: 100%;
+    max-width: 100%;
+  }
+  .longtable-annexe {
+    width: 100%;
+  }
+execute:
+  echo: false
+
+abstract: > 
+   
+
+metadata:
+  nature: ""
+  destinataire: ""
+  société: ""
+  objet: ""
+---
+
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import numpy as np
+
+from IPython.display import display, Markdown
+from tabulate import tabulate
+# Charger les données
+data_path = '/media/archive/EO4DM/TIME_SERIES_GLOBAL_DROUGHT_New_Caledonia_Fr/VHI_STATS_D_NoTrees_NoBuild.csv'
+data = pd.read_csv(data_path, sep=';')
+
+# Afficher les premières lignes pour avoir un aperçu
+#data.head()
+```
+
+
+
+``` {python}
+#| warning: false
+#| output: false
+
+# Sélectionner un échantillon représentatif de lieux
+# Pour cet exemple, nous prenons un échantillon aléatoire de 5 lieux
+NC = data.loc[data['LOCATION'] == "New Caledonia (Fr)"]['LOCATION'].drop_duplicates()
+communes = data.loc[data['LOCATION'] != "New Caledonia (Fr)"]['LOCATION'].drop_duplicates()
+data['DATE'] = pd.to_datetime(data['DATE'])
+
+# Filtrer les données pour ne garder que les lieux sélectionnés
+sample_data = data[data['LOCATION'].isin(communes)]
+nc_data = data[data['LOCATION'].isin(NC)]
+nc_data.sort_values(by=['LOCATION', 'DATE'], inplace=True)
+
+sample_data.sort_values(by=['LOCATION', 'DATE'], inplace=True)
+
+```
+
+
+# Evolution des moyennes mensuelles de VHI en Nouvelle-Calédonie
+
+Ci-dessous, l'évolution des moyennes mensuelles de VHI en Nouvelle-Calédonie en rouge. En gris, l'évolution des moyennes mensuelles de VHI pour chaque commune (superposées). Ce mode de representation permet de comparer l'évolution de la Nouvelle-Calédonie avec celle de l'ensemble des communes.
+
+```{python}
+#| warning: false
+#| panel: center
+#| fig-cap: "Evolution des moyennes mensuelles de VHI en Nouvelle-Calédonie"
+# Préparer la figure
+plt.figure(figsize=(14, 8))
+
+# Boucler sur chaque commune pour tracer son évolution temporelle
+for location in communes:
+    location_data = sample_data[sample_data['LOCATION'] == location]
+    # Supprimer le label pour éviter que ces lignes apparaissent dans la légende
+    plt.plot(location_data['DATE'], location_data['MEAN'], color='grey', alpha=0.2)
+
+plt.plot([], [], color='grey', alpha=0.2, label='Communes')
+# Boucler sur chaque lieu dans NC pour tracer son évolution temporelle
+for nc in NC:
+    location_data = nc_data[nc_data['LOCATION'] == nc]
+    plt.plot(location_data['DATE'], location_data['MEAN'], label=nc, color='red', alpha=1)
+
+# Générer la légende une seule fois ici, pour inclure uniquement les données de NC
+plt.legend()
+
+# Configurer le graphique
+plt.xlabel('Date')
+plt.ylabel('Moyenne de VHI')
+plt.xticks(rotation=45)
+plt.grid(True)
+
+# Afficher le graphique
+plt.tight_layout()
+plt.show()
+```
+
+
+Ci dessous l'évolution temporelle des moyennes de VHI par commune et par mois. Les valeurs extrêmes sont mises en évidence pour les communes (bleue) et pour la Nouvelle-Calédonie (rouge).
+
+```{python}
+#| warning: false
+#| panel: center
+#| fig-cap: "Evolution temporelle des moyennes de VHI par commune et par mois"
+
+plt.figure(figsize=(14, 8))
+
+# Supposons que sample_data et nc_data sont vos DataFrame pandas
+# et que 'DATE', 'MEAN', 'LOCATION' sont des colonnes dans ces DataFrame
+
+# Boucler sur chaque commune pour tracer son évolution temporelle
+for location in communes:
+    location_data = sample_data[sample_data['LOCATION'] == location]
+    # Déterminer la couleur en fonction de la proximité de 'MEAN' avec 0.5
+    colors = ['blue' if np.abs(val - 0.5) > 0.2 else 'grey' for val in location_data['MEAN']]
+    alpha = [0.5 if np.abs(val - 0.5) > 0.2 else 0.1 for val in location_data['MEAN']]
+    plt.scatter(location_data['DATE'], location_data['MEAN'], color=colors, alpha=alpha)
+
+for nc in NC:
+    location_data = nc_data[nc_data['LOCATION'] == nc]
+    plt.plot(location_data['DATE'], location_data['MEAN'], label=nc, color='red', alpha=0.4,  linewidth=1)
+
+for nc in NC:
+    location_data = nc_data[nc_data['LOCATION'] == nc]
+    # Déterminer la couleur en fonction de la proximité de 'MEAN' avec 0.5
+    colors = ['red' if np.abs(val - 0.5) > 0.2 else 'grey' for val in location_data['MEAN']]
+    alpha = [1 if np.abs(val - 0.5) > 0.2 else 1 for val in location_data['MEAN']]
+    plt.scatter(location_data['DATE'], location_data['MEAN'], color=colors, alpha=alpha)
+
+plt.scatter([], [], color='blue', alpha=0.2, label='Communes')
+
+# Boucler sur chaque lieu dans NC
+plt.legend()
+
+ax = plt.gca()  # Obtenir le contexte actuel de l'axe
+
+# Définir le format des étiquettes de l'axe des x pour montrer l'année pour chaque tick
+ax.xaxis.set_major_locator(mdates.YearLocator())
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+
+# Ajouter un locator secondaire pour juillet
+ax.xaxis.set_minor_locator(mdates.MonthLocator(bymonth=7))
+ax.xaxis.set_minor_formatter(mdates.DateFormatter(''))
+
+# Configurer le graphique
+plt.xlabel('Date')
+plt.ylabel('Moyenne de VHI')
+plt.xticks(rotation=45)
+plt.grid(True)
+
+plt.tight_layout()
+plt.show()
+```
+
+Zoom sur les valeurs extrêmes de la Nouvelle-Calédonie. Nous percevons les grandes années de sécheresse.
+Ce graphique illustre le 5e percentile de la moyenne sur la Nouvelle-Calédonie, indiquant ainsi la valeur sous laquelle se situent 5 % des moyennes les plus faibles de VHI observées.
+
+```{python}
+
+#| warning: false
+#| panel: center
+
+plt.figure(figsize=(14, 8))
+
+# Calculer le quantile 0.25 pour la colonne 'MEAN'
+q005 = nc_data['MEAN'].quantile(0.050)
+
+# Filtrer les lignes où 'B' est inférieur au quantile 0.25
+df_filtreq005 = nc_data[nc_data['MEAN'] < q005]
+
+df_filtreq005
+
+plt.scatter(df_filtreq005['DATE'], df_filtreq005['MEAN'], color='red', alpha=0.5)
+
+ax = plt.gca()
+
+# Définir les couleurs à alterner
+colors = ['lightblue', 'lightgrey']
+# Parcourir les années dans les données
+for i, year in enumerate(range(df_filtreq005['DATE'].dt.year.min(), df_filtreq005['DATE'].dt.year.max() + 1)):
+    # Déterminer le début et la fin de chaque année
+    start_date = pd.Timestamp(year=year, month=1, day=1)
+    end_date = pd.Timestamp(year=year, month=12, day=31)
+    
+    # Ajouter une section colorée pour l'année
+    ax.axvspan(start_date, end_date, color=colors[i % len(colors)], alpha=0.3)
+
+# Définir le format des étiquettes de l'axe des x pour montrer l'année pour chaque tick
+ax.xaxis.set_major_locator(mdates.YearLocator())
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+
+# Ajouter un locator secondaire pour juillet
+ax.xaxis.set_minor_locator(mdates.MonthLocator(bymonth=7))
+ax.xaxis.set_minor_formatter(mdates.DateFormatter(''))
+plt.xticks(rotation=45)
+plt.title('Valeur moyenne extrême')
+plt.xlabel('Date')
+plt.ylabel('Moyenne de VHI')
+plt.xticks(rotation=45)
+plt.grid(True)
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+#| warning: false
+#| panel: center
+#| tbl-cap: "Nombre de valeurs extrêmes par année"
+
+tableau = df_filtreq005[['DATE','MEAN']].reset_index(drop=True)
+tableau["ANNEE"] = tableau["DATE"].dt.year
+tb = tableau.groupby(['ANNEE']).size().to_frame('Nombre de valeurs extrêmes par année').reset_index()
+
+
+
+display(Markdown( tabulate( 
+  tb[['ANNEE','Nombre de valeurs extrêmes par année']],
+  headers=['ANNEE', 'Nombre de valeurs extrêmes par année'],
+  )
+  ) )
+```
+
+
+
+
+# Détail de l'évolution des moyennes trimestrielles de VHI par commune 
+
+Pour chaque commune, nous traçons l'évolution temporelle des moyennes trimestrielles de VHI, avec les écarts types, les valeurs minimales et maximales.
+
+
+```{python}
+#| warning: false
+#| panel: center
+# Création du DataFrame
+
+
+df = sample_data
+# Conversion de la colonne DATE en datetime
+df['DATE'] = pd.to_datetime(df['DATE'])
+
+monthly_stats = df.resample('M', on='DATE')['MEAN'].agg(['mean', 'std', 'min', 'max'])
+
+df.sort_values(by=['LOCATION', 'DATE'], inplace=True)
+
+# Conversion des dates en trimestres (type Period)
+df['TRIMESTRE'] = df['DATE'].dt.to_period('Q')
+df['TRIMESTRE_DATE'] = pd.PeriodIndex(df['TRIMESTRE']).to_timestamp()
+# Regroupement par LOCATION et par trimestre, puis calcul de la moyenne
+resultat = df.groupby(['LOCATION', 'TRIMESTRE_DATE'])[['MEAN','STD','MIN','MAX']].mean().reset_index()
+
+# Pour le tracé, on peut convertir TRIMESTRE en string si nécessaire (dépend de la bibliothèque de tracé)
+#resultat['TRIMESTRE_STR'] = resultat['TRIMESTRE'].astype(str)
+resultat.sort_values(by=['LOCATION', 'TRIMESTRE_DATE'], inplace=True)
+# Tracé des résultats
+
+for location in resultat['LOCATION'].unique():
+    fig, ax = plt.subplots(figsize=(14, 8))
+    data_to_plot = resultat[resultat['LOCATION'] == location]
+    ax.plot(data_to_plot['TRIMESTRE_DATE'], data_to_plot['MEAN'], marker='', label=location)
+    
+    plt.fill_between(data_to_plot['TRIMESTRE_DATE'], data_to_plot['MEAN'] - data_to_plot['STD'],
+                     data_to_plot['MEAN'] + data_to_plot['STD'], alpha=0.2)
+    
+    # Tracer les valeurs minimales et maximales
+    plt.plot(data_to_plot['TRIMESTRE_DATE'], data_to_plot['MIN'], label=f'{location} MIN', linestyle='--')
+    plt.plot(data_to_plot['TRIMESTRE_DATE'], data_to_plot['MAX'], label=f'{location} MAX', linestyle='--')
+    # Configurer les graduations principales pour les années
+    ax.xaxis.set_major_locator(mdates.YearLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+    
+    # Configurer les graduations secondaires pour les trimestres
+    ax.xaxis.set_minor_locator(mdates.MonthLocator(bymonth=(1, 4, 7, 10)))
+    ax.xaxis.set_minor_formatter(mdates.DateFormatter(''))
+ 
+    # Ajouter une section colorée pour chaque année
+    start_of_period = data_to_plot['TRIMESTRE_DATE'].min()
+    end_of_period = data_to_plot['TRIMESTRE_DATE'].max()
+    current_year = start_of_period.year
+    while current_year <= end_of_period.year:
+        start_date = pd.Timestamp(year=current_year, month=1, day=1)
+        end_date = pd.Timestamp(year=current_year, month=12, day=31)
+        ax.axvspan(start_date, end_date, color=colors[current_year % len(colors)], alpha=0.1)
+        current_year += 1
+
+   # Améliorer le graphique
+    plt.title(f'{location} : Évolution Temporelle des moyennes (Écarts Types, Min et Max)')
+    ax.set_xlabel('Année - Trimestre')
+    ax.set_ylabel('Moyenne de VHI')
+    ax.legend()
+
+    plt.xticks(rotation=45)  # Rotation des étiquettes pour une meilleure lisibilité
+    plt.tight_layout()  # Ajuste automatiquement les paramètres de la figure
+    plt.show()
+
+
+```
+
+
+
+
+# Evolution de la moyenne mensuelle des QSCORE par mois
+
+QSCORE est un indice moyen historique estimé pour chaque mois et chaque décade qui évalue la qualité des données valides utilisées dans le calcul des anomalies. Il s’agit ici de prendre en compte la propagation des données manquantes (ou à l’inverse "valides") issues de l’historiques (série temporelle) dans l’indicateur de sécheresse final. 
+
+```{python}
+#| warning: false
+#| panel: center
+
+# Calculer les statistiques nécessaires : moyenne, écart type, min, et max des QSCORE par mois
+monthly_stats = sample_data.resample('M', on='DATE')['QSCORE'].agg(['mean', 'std', 'min', 'max'])
+
+# Préparer la figure pour le graphique
+fig, ax = plt.subplots(figsize=(14, 8))
+
+# Tracer la moyenne des QSCORE par mois
+plt.plot(monthly_stats.index, monthly_stats['mean'], label='Moyenne',  linestyle='-',  alpha=0.5)
+
+# Tracer l'écart type des QSCORE par mois
+plt.fill_between(monthly_stats.index, monthly_stats['mean'] - monthly_stats['std'], monthly_stats['mean'] + monthly_stats['std'], alpha=0.2, label='Écart Type')
+
+# Tracer les valeurs minimales et maximales des QSCORE par mois
+plt.plot(monthly_stats.index, monthly_stats['min'], label='Min', linestyle='--', alpha=0.5)
+plt.plot(monthly_stats.index, monthly_stats['max'], label='Max', linestyle='--', alpha=0.5)
+ax.xaxis.set_major_locator(mdates.YearLocator())
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+
+# Ajouter un locator secondaire pour juillet
+ax.xaxis.set_minor_locator(mdates.MonthLocator(bymonth=7))
+ax.xaxis.set_minor_formatter(mdates.DateFormatter(''))
+# Configurer le graphique
+plt.title('Évolution des Statistiques des QSCORE par Mois')
+plt.xlabel('Date')
+plt.ylabel('QSCORE')
+plt.legend()
+plt.grid(True)
+plt.xticks(rotation=45)  # Rotation des étiquettes pour une meilleure lisibilité
+plt.tight_layout()
+# Afficher le graphique
+plt.show()
+
+
+```
