@@ -418,7 +418,13 @@ Une présentation de la chaine a été faite à la conférence du 27 Novembre au
 
 # Annexes {#sec-Annexes}
 
-{{< pdf ressources/conventions/231205_Convention.pdf >}}
+
+
+```{=html}
+<object data="ressources/conventions/231205_Convention.pdf " type="application/pdf" width="100%" height="100%" style="min-height:100vh;">
+   <a href=" ressources/conventions/231205_Convention.pdf">Télécharger le PDF</a></p>
+</object>
+```
 
 :::
 
@@ -432,7 +438,20 @@ Une présentation de la chaine a été faite à la conférence du 27 Novembre au
 ## Documentation des chaines de traitement {#sec-readmeEO4DM}
 
 
-\includepdf[scale=0.8, pages=2-7, pagecommand={}]{ressources/manuel-exploitation.pdf}
+::: {.content-visible unless-format="pdf"}
+
+
+```{=html}
+<object data="ressources/manuel-exploitation.pdf " type="application/pdf" width="100%" height="100%" style="min-height:100vh;">
+   <a href=" ressources/manuel-exploitation.pdf">Télécharger le PDF</a></p>
+</object>
+```
+
+
+:::
+\includepdf[scale=0.7, pages=1, pagecommand={}]{ressources/manuel-exploitation.pdf}
+
+\includepdf[scale=0.8, pages=2-, pagecommand={}]{ressources/manuel-exploitation.pdf}
 
 
 ## Documentation des chaines de traitement {#sec-readmePrevision}
@@ -468,7 +487,12 @@ L'étude réalisée sur le gapfilling des données Landsat 7 a permis de mettre 
 
 
 ::: {.content-visible unless-format="pdf"}
-{{< pdf ressources/livrables/Note_synthese_DataCubes.pdf >}}
+
+```{=html}
+<object data="ressources/livrables/Note_synthese_DataCubes.pdf " type="application/pdf" width="100%" height="100%" style="min-height:100vh;">
+   <a href=" ressources/livrables/Note_synthese_DataCubes.pdf">Télécharger le PDF</a></p>
+</object>
+```
 
 :::
 
@@ -504,7 +528,14 @@ SMAP dans la chaine Alertes - Sécheresse} \label{sec-chirps}}]{ressources/livra
 
 ## Restitution - PGRSC
 
-{{< pdf ressources/presentation/OperationalVegetationDroughtProcessing_PGRSC_Neuhauser_et_al_2023.pdf >}}
+
+
+```{=html}
+<object data="ressources/presentation/OperationalVegetationDroughtProcessing_PGRSC_Neuhauser_et_al_2023.pdf " type="application/pdf" width="100%" height="100%" style="min-height:100vh;">
+   <a href=" ressources/presentation/OperationalVegetationDroughtProcessing_PGRSC_Neuhauser_et_al_2023.pdf">Télécharger le PDF</a></p>
+</object>
+```
+
 :::
 
 \includepdf[scale=0.7,pages=1, pagecommand={}{\subsection{Restitution - PGRSC} \label{sec-pgrsc} }]{ressources/presentation/OperationalVegetationDroughtProcessing_PGRSC_Neuhauser_et_al_2023.pdf}
