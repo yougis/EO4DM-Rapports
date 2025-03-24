@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "eo4dm-rapports"
+version = "0.1.0"
+description = "simple rapport quarto sur le projet EO4DM"
+authors = ["Hugo Roussaffa <hugoroussaffa@gmail.com>"]
+license = "CC BY SA 4.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+jupyter = "^1.1.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
